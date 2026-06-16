@@ -170,11 +170,30 @@ export function FriendForm({ friend, onClose }: FriendFormProps) {
 
       <div>
         <label className="block text-sm font-medium text-warm-text mb-1">认识地点</label>
-        <input
-          {...register('met_place_name')}
-          className="w-full px-3 py-2 rounded-btn border border-warm-border bg-white focus:outline-none focus:ring-2 focus:ring-warm-primary/30 focus:border-warm-primary text-sm transition-colors"
-          placeholder="在哪里认识的？"
+        <LocationSearch
+          placeholder="在哪里认识的？（如：王者荣耀 / 上海XX咖啡馆）"
+          value={watch('met_place_name') || ''}
+          onChange={(name, lat, lng) => {
+            setValue('met_place_name', name);
+            if (lat !== undefined) setValue('met_place_lat', lat);
+            if (lng !== undefined) setValue('met_place_lng', lng);
+          }}
         />
+        <p className="text-xs text-warm-muted mt-1">支持输入虚拟地点或搜索真实位置</p>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-warm-text mb-1">所在地（选填）</label>
+        <LocationSearch
+          placeholder="现在在哪座城市？"
+          value={watch('current_location_name') || ''}
+          onChange={(name, lat, lng) => {
+            setValue('current_location_name', name);
+            if (lat !== undefined) setValue('current_location_lat', lat);
+            if (lng !== undefined) setValue('current_location_lng', lng);
+          }}
+        />
+        <p className="text-xs text-warm-muted mt-1">对网友很有用，选填</p>
       </div>
 
       <div>
