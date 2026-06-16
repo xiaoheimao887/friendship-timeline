@@ -18,8 +18,8 @@ export function FriendListPage() {
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(f =>
-        f.name.toLowerCase().includes(q) ||
-        (f.nickname?.toLowerCase().includes(q))
+        f.nickname.toLowerCase() ||
+        (f.name?.toLowerCase().includes(q))
       );
     }
 
