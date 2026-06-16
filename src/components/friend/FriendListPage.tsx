@@ -18,11 +18,7 @@ export function FriendListPage() {
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(f =>
-<<<<<<< HEAD
-        f.nickname.toLowerCase() ||
-=======
         f.nickname.toLowerCase().includes(q) ||
->>>>>>> 6dea4b8 (fix: f.name possibly undefined in search - swap to nickname first)
         (f.name?.toLowerCase().includes(q))
       );
     }
