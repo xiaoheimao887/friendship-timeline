@@ -13,31 +13,16 @@ import { NotFound } from './pages/NotFound';
 import { useFriendStore } from './store/useFriendStore';
 
 function AppContent() {
-  const { initialized, pinHash } = useFriendStore();
-  const [showPin, setShowPin] = useState(!pinHash);
+  const { initialized } = useFriendStore();
+  const [showPin, setShowPin] = useState(true);
 
-  // On mount, check if we have a stored pinHash
+  // Always show PIN page on mount - no auto-login with secondary password
   useEffect(() => {
-    const stored = localStorage.getItem('pinHash');
-    if (stored) {
-      useFriendStore.getState().setPinHash(stored);
-      useFriendStore.getState().loadFriends(stored);
-      setShowPin(false);
-    }
-    // Always show PIN page on first visit
-    if (!stored) {
-      setShowPin(true);
-    }
+    setShowPin(true);
   }, []);
-
-  const handlePinComplete = () => {
-    setShowPin(false);
-  };
 
   if (showPin) {
     return <SetupPinPage onComplete={() => {
-      const hash = useFriendStore.getState().pinHash;
-      if (hash) localStorage.setItem('pinHash', hash);
       setShowPin(false);
     }} />;
   }

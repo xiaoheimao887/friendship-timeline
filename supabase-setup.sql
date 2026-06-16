@@ -51,4 +51,16 @@ CREATE POLICY "Allow all for milestones" ON milestones
   USING (true)
   WITH CHECK (true);
 
--- 6. 在 Supabase Dashboard > Storage 中创建 avatars bucket，设为 public
+-- 6. 创建 auth 表（PIN + 二级密码）
+CREATE TABLE IF NOT EXISTS auth (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  pin_hash TEXT NOT NULL UNIQUE,
+  pin_key_hash TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE auth ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all for auth" ON auth
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- 7. 在 Supabase Dashboard > Storage 中创建 avatars bucket，设为 public
