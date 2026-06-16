@@ -106,7 +106,7 @@ export function FriendForm({ friend, onClose }: FriendFormProps) {
       }
       onClose();
     } catch (error) {
-      console.error('Failed to save friend:', error); alert('Debug: ' + JSON.stringify(error));
+      console.error('Failed to save friend:', error);
       showToast('保存失败: ' + (error instanceof Error ? error.message : JSON.stringify(error)), 'error');
     }
   };
