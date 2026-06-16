@@ -4,6 +4,7 @@ import { Modal } from '../ui/Modal';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { formatDate } from '../../utils/date-utils';
 import { useToast } from '../ui/ToastProvider';
+import { DatePicker } from '../ui/DatePicker';
 import type { Milestone, MilestoneFormData } from '../../types';
 
 interface MilestoneListProps {
@@ -177,12 +178,10 @@ function MilestoneFormModal({ open, onClose, onSubmit, title, initial }: {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block text-sm font-medium text-warm-text mb-1">日期</label>
-          <input
-            type="date"
+          <DatePicker
             value={date}
-            onChange={e => setDate(e.target.value)}
+            onChange={setDate}
             required
-            className="w-full px-3 py-2 rounded-btn border border-warm-border focus:outline-none focus:ring-2 focus:ring-warm-primary/30 focus:border-warm-primary text-sm"
           />
         </div>
         <div>

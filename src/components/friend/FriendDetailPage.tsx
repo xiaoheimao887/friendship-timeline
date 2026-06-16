@@ -74,6 +74,9 @@ export function FriendDetailPage() {
                 <p className="text-sm text-warm-accent mt-1">
                   认识 {duration}
                 </p>
+                {friend.current_location_name && (
+                  <p className="text-xs text-warm-muted mt-1">📍 {friend.current_location_name}</p>
+                )}
               </div>
               <div className="flex gap-2 shrink-0">
                 <button

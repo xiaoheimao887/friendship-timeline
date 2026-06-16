@@ -5,6 +5,8 @@ import { AvatarUpload } from '../avatar/AvatarUpload';
 import { TagBadge } from '../tags/TagBadge';
 import { useFriendStore } from '../../store/useFriendStore';
 import { useToast } from '../ui/ToastProvider';
+import { DatePicker } from '../ui/DatePicker';
+import { LocationSearch } from '../ui/LocationSearch';
 import { uploadAvatar, deleteAvatar } from '../../services/friendService';
 import type { FriendFormData, RelationshipStatus } from '../../types';
 import type { Friend } from '../../types';
@@ -30,8 +32,10 @@ export function FriendForm({ friend, onClose }: FriendFormProps) {
       nickname: friend.nickname,
       name: friend.name || '',
       met_date: friend.met_date,
-      met_place_name: friend.met_place_name || '',
+      current_location_name: friend.current_location_name || '',
       met_place_lat: friend.met_place_lat,
+      current_location_lat: friend.current_location_lat,
+      current_location_lng: friend.current_location_lng,
       met_place_lng: friend.met_place_lng,
       met_story: friend.met_story,
       relationship: friend.relationship,
@@ -143,10 +147,10 @@ export function FriendForm({ friend, onClose }: FriendFormProps) {
       <div className="grid grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-warm-text mb-1">认识日期 *</label>
-          <input
-            type="date"
-            {...register('met_date', { required: '请选择日期' })}
-            className="w-full px-3 py-2 rounded-btn border border-warm-border bg-white focus:outline-none focus:ring-2 focus:ring-warm-primary/30 focus:border-warm-primary text-sm transition-colors"
+          <DatePicker
+            value={watch('met_date')}
+            onChange={(v) => setValue('met_date', v)}
+            required
           />
           {errors.met_date && <p className="text-xs text-red-400 mt-1">{errors.met_date.message}</p>}
         </div>

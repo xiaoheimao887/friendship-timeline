@@ -1,26 +1,57 @@
 import { useMemo, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import L from 'leaflet';
 import { useFriendStore } from '../../store/useFriendStore';
 import { FriendAvatar } from '../avatar/FriendAvatar';
-import { TagBadge } from '../tags/TagBadge';
 import { Link } from 'react-router-dom';
 import { formatDateShort } from '../../utils/date-utils';
 import { EmptyState } from '../ui/EmptyState';
+
+function createMarkerIcon(color: string) {
+  return L.divIcon({
+    className: 'custom-marker',
+    html: `<div style="
+      width: 24px; height: 24px;
+      background: ${color};
+      border: 3px solid white;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    "></div>`,
+    iconSize: [24, 24],
+    iconAnchor: [12, 12],
+    popupAnchor: [0, -14],
+  });
+}
+
+const MEET_ICON = createMarkerIcon('#D4826A');
+const LOCATION_ICON = createMarkerIcon('#7FB3A0');
 
 export function MapPage() {
   const friends = useFriendStore(s => s.friends);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
 
-  const placed = useMemo(() => {
-    let result = friends.filter(f => f.met_place_lat && f.met_place_lng);
-    if (selectedTag) {
-      result = result.filter(f => f.tags.includes(selectedTag));
-    }
-    return result;
+  const filteredFriends = useMemo(() => {
+    if (!selectedTag) return friends;
+    return friends.filter(f => f.tags.includes(selectedTag));
   }, [friends, selectedTag]);
 
+  const markers = useMemo(() => {
+    const result: { type: 'meet' | 'current'; friend: typeof friends[0]; lat: number; lng: number }[] = [];
+
+    filteredFriends.forEach(f => {
+      if (f.met_place_lat && f.met_place_lng) {
+        result.push({ type: 'meet', friend: f, lat: f.met_place_lat, lng: f.met_place_lng });
+      }
+      if (f.current_location_lat && f.current_location_lng) {
+        result.push({ type: 'current', friend: f, lat: f.current_location_lat, lng: f.current_location_lng });
+      }
+    });
+
+    return result;
+  }, [filteredFriends]);
+
   const allTags = Array.from(new Set(friends.flatMap(f => f.tags))).sort();
-  const unplaced = friends.filter(f => !f.met_place_lat);
+  const hasAnyLocation = friends.some(f => f.met_place_lat || f.current_location_lat);
 
   if (!useFriendStore.getState().initialized) {
     return (
@@ -34,9 +65,12 @@ export function MapPage() {
     <div className="h-[calc(100vh-6rem)] flex flex-col">
       <div className="flex items-center justify-between mb-4 flex-wrap gap-2">
         <h1 className="text-xl font-semibold text-warm-text">地图</h1>
-        <div className="flex items-center gap-2">
-          <span className="text-xs text-warm-muted">
-            已标注 {placed.length}/{friends.filter(f => f.met_place_lat).length} 位
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1.5 text-xs text-warm-muted">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#D4826A]" /> 认识地点
+          </span>
+          <span className="flex items-center gap-1.5 text-xs text-warm-muted">
+            <span className="w-2.5 h-2.5 rounded-full bg-[#7FB3A0]" /> 所在地
           </span>
         </div>
       </div>
@@ -59,12 +93,12 @@ export function MapPage() {
       </div>
 
       <div className="flex-1 rounded-card overflow-hidden border border-warm-border/50">
-        {placed.length === 0 ? (
+        {!hasAnyLocation ? (
           <div className="h-full flex items-center justify-center bg-white">
             <EmptyState
               icon="🗺"
               title="还没有标记地点"
-              description={unplaced.length > 0 ? `${unplaced.length} 位朋友还没有标注认识地点，编辑档案添加吧` : '添加朋友时填写认识地点即可在地图上显示'}
+              description="添加朋友时填写地点并搜索真实位置即可在地图上显示"
             />
           </div>
         ) : (
@@ -75,24 +109,28 @@ export function MapPage() {
             scrollWheelZoom={true}
           >
             <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+              url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
             />
-            {placed.map(friend => (
+            {markers.map((m, i) => (
               <Marker
-                key={friend.id}
-                position={[friend.met_place_lat!, friend.met_place_lng!]}
+                key={`${m.friend.id}-${m.type}-${i}`}
+                position={[m.lat, m.lng]}
+                icon={m.type === 'meet' ? MEET_ICON : LOCATION_ICON}
               >
                 <Popup>
-                  <div className="flex items-center gap-2 min-w-[150px]">
-                    <FriendAvatar friend={friend} size="sm" />
+                  <div className="flex items-center gap-2 min-w-[160px]">
+                    <FriendAvatar friend={m.friend} size="sm" />
                     <div>
-                      <Link to={`/friends/${friend.id}`} className="font-medium text-sm text-warm-primary hover:underline">
-                        {friend.nickname}
+                      <Link to={`/friends/${m.friend.id}`} className="font-medium text-sm text-warm-primary hover:underline block">
+                        {m.friend.nickname}
                       </Link>
-                      <p className="text-xs text-warm-muted">{formatDateShort(friend.met_date)}</p>
-                      {friend.met_place_name && (
-                        <p className="text-xs text-warm-muted">{friend.met_place_name}</p>
+                      <p className="text-xs text-warm-muted mt-0.5">
+                        {m.type === 'meet' ? '📍 ' : '📌 '}
+                        {m.type === 'meet' ? (m.friend.met_place_name || '认识地点') : (m.friend.current_location_name || '所在地')}
+                      </p>
+                      {m.type === 'meet' && (
+                        <p className="text-xs text-warm-muted">{formatDateShort(m.friend.met_date)}</p>
                       )}
                     </div>
                   </div>
@@ -103,9 +141,9 @@ export function MapPage() {
         )}
       </div>
 
-      {unplaced.length > 0 && (
+      {hasAnyLocation && (
         <p className="text-xs text-warm-muted mt-3 text-center">
-          {unplaced.length} 位朋友未标注地点
+          共 {markers.length} 个标记 / {friends.length} 位朋友
         </p>
       )}
     </div>

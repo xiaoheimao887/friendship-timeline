@@ -33,6 +33,9 @@ export interface Friend {
   met_place_name?: string;
   met_place_lat?: number;
   met_place_lng?: number;
+  current_location_name?: string;
+  current_location_lat?: number;
+  current_location_lng?: number;
   met_story: string;
   relationship: RelationshipStatus;
   created_at: string;
@@ -48,6 +51,9 @@ export interface FriendFormData {
   met_place_name?: string;
   met_place_lat?: number;
   met_place_lng?: number;
+  current_location_name?: string;
+  current_location_lat?: number;
+  current_location_lng?: number;
   met_story: string;
   relationship: RelationshipStatus;
 }
