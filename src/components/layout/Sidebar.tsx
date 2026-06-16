@@ -12,7 +12,7 @@ export function Sidebar() {
   const friends = useFriendStore(s => s.friends);
 
   return (
-    <aside className="hidden md:flex flex-col w-60 h-screen bg-warm-sidebar border-r border-warm-border/50 p-5 shrink-0">
+    <aside className="hidden md:flex flex-col w-60 min-h-screen bg-warm-sidebar border-r border-warm-border/50 p-5 shrink-0 sticky top-0">
       <div className="mb-8">
         <h1 className="text-xl font-semibold text-warm-text">友谊时间线</h1>
         <p className="text-xs text-warm-muted mt-1">记录每一段相遇</p>
