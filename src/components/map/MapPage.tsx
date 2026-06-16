@@ -11,7 +11,7 @@ function createMeetIcon(nickname: string) {
   return L.divIcon({
     className: 'custom-marker',
     html: `<div style="
-      background: #D4826A;
+      background: #F7B5CA;
       color: white;
       padding: 3px 8px;
       border-radius: 10px;
@@ -90,7 +90,7 @@ export function MapPage() {
         <h1 className="text-xl font-semibold text-warm-text">地图</h1>
         <div className="flex items-center gap-3">
           <span className="flex items-center gap-1.5 text-xs text-warm-muted">
-            <span className="w-2.5 h-2.5 rounded-full bg-[#D4826A]" /> 认识地点
+            <span className="w-2.5 h-2.5 rounded-full bg-[#F7B5CA]" /> 认识地点
           </span>
           <span className="flex items-center gap-1.5 text-xs text-warm-muted">
             <span className="w-2.5 h-2.5 rounded-full bg-[#7FB3A0]" /> 所在地
