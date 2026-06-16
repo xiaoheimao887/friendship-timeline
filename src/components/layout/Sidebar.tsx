@@ -38,10 +38,24 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="pt-4 border-t border-warm-border/50">
+      <div className="pt-4 border-t border-warm-border/50 space-y-2">
         <p className="text-xs text-warm-muted">
           共 {friends.length} 位朋友
         </p>
+        <button
+          onClick={() => {
+            localStorage.removeItem('pinHash');
+            window.location.reload();
+          }}
+          className="flex items-center gap-2 px-3 py-2 rounded-btn text-xs text-warm-muted hover:text-red-400 hover:bg-white/50 transition-colors w-full"
+        >
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M9 10.5L12.5 7L9 3.5" />
+            <path d="M12.5 7H4" />
+            <path d="M4 12.5H2.5C1.95 12.5 1.5 12.05 1.5 11.5V2.5C1.5 1.95 1.95 1.5 2.5 1.5H4" />
+          </svg>
+          退出登录
+        </button>
       </div>
     </aside>
   );
