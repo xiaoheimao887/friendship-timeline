@@ -35,7 +35,7 @@ function createLocationIcon(nickname: string) {
       border-radius: 50%;
       box-shadow: 0 2px 8px rgba(0,0,0,0.25);
       display: flex; align-items: center; justify-content: center;
-      font-size: 11px; color: #7EC8E3; font-weight: 600;
+      font-size: 11px; color: #F19A9A; font-weight: 600;
     ">${nickname.charAt(0)}</div>`,
     iconSize: [28, 28],
     iconAnchor: [14, 14],
