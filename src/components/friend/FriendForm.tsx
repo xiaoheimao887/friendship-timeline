@@ -107,7 +107,7 @@ export function FriendForm({ friend, onClose }: FriendFormProps) {
       onClose();
     } catch (error) {
       console.error('Failed to save friend:', error);
-      showToast('保存失败，请重试', 'error');
+      showToast('保存失败: ' + (error instanceof Error ? error.message : '网络错误'), 'error');
     }
   };
 

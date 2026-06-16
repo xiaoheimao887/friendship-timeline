@@ -23,7 +23,9 @@ function AppContent() {
       useFriendStore.getState().setPinHash(stored);
       useFriendStore.getState().loadFriends(stored);
       setShowPin(false);
-    } else {
+    }
+    // Always show PIN page on first visit
+    if (!stored) {
       setShowPin(true);
     }
   }, []);
