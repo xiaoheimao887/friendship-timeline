@@ -7,24 +7,33 @@ import { Link } from 'react-router-dom';
 import { formatDateShort } from '../../utils/date-utils';
 import { EmptyState } from '../ui/EmptyState';
 
-function createMarkerIcon(color: string) {
+function createMarkerIcon(color: string, letter: string) {
   return L.divIcon({
     className: 'custom-marker',
     html: `<div style="
-      width: 24px; height: 24px;
+      width: 28px; height: 28px;
       background: ${color};
-      border: 3px solid white;
+      border: 2px solid white;
       border-radius: 50%;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-    "></div>`,
-    iconSize: [24, 24],
-    iconAnchor: [12, 12],
-    popupAnchor: [0, -14],
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; font-weight: 600; color: white;
+    ">${letter}</div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -16],
   });
 }
 
-const MEET_ICON = createMarkerIcon('#D4826A');
-const LOCATION_ICON = createMarkerIcon('#7FB3A0');
+function createMeetIcon(nickname: string) {
+  const letter = nickname.charAt(0);
+  return createMarkerIcon('#D4826A', letter);
+}
+
+function createLocationIcon(nickname: string) {
+  const letter = nickname.charAt(0);
+  return createMarkerIcon('#7FB3A0', letter);
+}
 
 export function MapPage() {
   const friends = useFriendStore(s => s.friends);
@@ -116,7 +125,7 @@ export function MapPage() {
               <Marker
                 key={`${m.friend.id}-${m.type}-${i}`}
                 position={[m.lat, m.lng]}
-                icon={m.type === 'meet' ? MEET_ICON : LOCATION_ICON}
+                icon={m.type === 'meet' ? createMeetIcon(m.friend.nickname) : createLocationIcon(m.friend.nickname)}
               >
                 <Popup>
                   <div className="flex items-center gap-2 min-w-[160px]">
