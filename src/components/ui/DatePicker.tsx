@@ -11,14 +11,14 @@ function range(start: number, end: number): number[] {
   return Array.from({ length: end - start + 1 }, (_, i) => start + i);
 }
 
-const CHINESE_MONTHS = ['一月', '二月', '三月', '四月', '五月', '六月', '七月', '八月', '九月', '十月', '十一月', '十二月'];
+const MONTHS = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
 
 export function DatePicker({ value, onChange, required, className = '' }: DatePickerProps) {
   const [year, month, day] = value ? value.split('-').map(Number) : [0, 0, 0];
 
   const years = useMemo(() => {
     const current = new Date().getFullYear();
-    return range(current - 50, current + 1);
+    return Array.from({ length: 51 }, (_, i) => current - i);
   }, []);
 
   const daysInMonth = useMemo(() => {
@@ -65,7 +65,7 @@ export function DatePicker({ value, onChange, required, className = '' }: DatePi
         className={`flex-1 px-3 py-2 rounded-btn border border-warm-border bg-white focus:outline-none focus:ring-2 focus:ring-warm-primary/30 focus:border-warm-primary text-sm transition-colors appearance-none cursor-pointer ${!month ? 'text-warm-muted' : 'text-warm-text'}`}
       >
         <option value="" disabled>月</option>
-        {CHINESE_MONTHS.map((name, i) => (
+        {MONTHS.map((name, i) => (
           <option key={i + 1} value={i + 1}>{name}</option>
         ))}
       </select>
