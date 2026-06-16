@@ -11,20 +11,17 @@ function createMeetIcon(nickname: string) {
   return L.divIcon({
     className: 'custom-marker',
     html: `<div style="
+      width: 28px; height: 28px;
       background: #D4826A;
-      color: #F7B5CA;
-      padding: 3px 8px;
-      border-radius: 10px;
-      font-size: 12px;
-      font-weight: 500;
-      white-space: nowrap;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      border: 1.5px solid white;
-      line-height: 1.4;
-    ">${nickname}</div>`,
-    iconSize: [0, 0],
-    iconAnchor: [0, 0],
-    popupAnchor: [0, -22],
+      border: 2px solid white;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: #F7B5CA; font-weight: 600;
+    ">${nickname.charAt(0)}</div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -16],
   });
 }
 
@@ -32,20 +29,17 @@ function createLocationIcon(nickname: string) {
   return L.divIcon({
     className: 'custom-marker',
     html: `<div style="
+      width: 28px; height: 28px;
       background: #7FB3A0;
-      color: #F7B5CA;
-      padding: 3px 8px;
-      border-radius: 10px;
-      font-size: 12px;
-      font-weight: 500;
-      white-space: nowrap;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.2);
-      border: 1.5px solid white;
-      line-height: 1.4;
-    ">${nickname}</div>`,
-    iconSize: [0, 0],
-    iconAnchor: [0, 0],
-    popupAnchor: [0, -22],
+      border: 2px solid white;
+      border-radius: 50%;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 11px; color: white; font-weight: 600;
+    ">${nickname.charAt(0)}</div>`,
+    iconSize: [28, 28],
+    iconAnchor: [14, 14],
+    popupAnchor: [0, -16],
   });
 }
 
