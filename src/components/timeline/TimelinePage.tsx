@@ -21,8 +21,8 @@ export function TimelinePage() {
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
       result = result.filter(f =>
-        f.name.toLowerCase().includes(q) ||
-        (f.nickname?.toLowerCase().includes(q))
+        f.nickname.toLowerCase().includes(q) ||
+        (f.name?.toLowerCase().includes(q))
       );
     }
 
@@ -137,7 +137,7 @@ export function TimelinePage() {
                               className="font-medium text-warm-text hover:text-warm-primary transition-colors"
                               onClick={e => e.stopPropagation()}
                             >
-                              {friend.name}
+                              {friend.nickname}
                             </Link>
                             <span className="text-xs text-warm-muted shrink-0">{formatDateShort(friend.met_date)}</span>
                           </div>

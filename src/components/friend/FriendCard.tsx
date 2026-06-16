@@ -17,7 +17,7 @@ export function FriendCard({ friend }: FriendCardProps) {
     >
       <div className="flex flex-col items-center text-center">
         <FriendAvatar friend={friend} size="lg" className="mb-3" />
-        <h3 className="font-semibold text-warm-text">{friend.name}</h3>
+        <h3 className="font-semibold text-warm-text">{friend.nickname}</h3>
         {friend.nickname && (
           <p className="text-xs text-warm-muted mt-0.5">{friend.nickname}</p>
         )}

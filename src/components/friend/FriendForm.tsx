@@ -27,8 +27,8 @@ export function FriendForm({ friend, onClose }: FriendFormProps) {
 
   const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm<FriendFormData>({
     defaultValues: friend ? {
-      name: friend.name,
-      nickname: friend.nickname || '',
+      nickname: friend.nickname,
+      name: friend.name || '',
       met_date: friend.met_date,
       met_place_name: friend.met_place_name || '',
       met_place_lat: friend.met_place_lat,
@@ -114,7 +114,7 @@ export function FriendForm({ friend, onClose }: FriendFormProps) {
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
       <AvatarUpload
-        friend={{ name: watch('name') || '预览', avatar_url: avatarUrl }}
+        friend={{ nickname: watch('nickname') || '预览', avatar_url: avatarUrl }}
         onUpload={handleUpload}
         onRemove={handleRemoveAvatar}
         uploading={uploading}
@@ -122,20 +122,20 @@ export function FriendForm({ friend, onClose }: FriendFormProps) {
 
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-sm font-medium text-warm-text mb-1">名字 *</label>
+          <label className="block text-sm font-medium text-warm-text mb-1">昵称 *</label>
           <input
-            {...register('name', { required: '请输入名字' })}
+            {...register('nickname', { required: '请输入昵称' })}
             className="w-full px-3 py-2 rounded-btn border border-warm-border bg-white focus:outline-none focus:ring-2 focus:ring-warm-primary/30 focus:border-warm-primary text-sm transition-colors"
-            placeholder="输入名字"
+            placeholder="平时怎么称呼？"
           />
-          {errors.name && <p className="text-xs text-red-400 mt-1">{errors.name.message}</p>}
+          {errors.nickname && <p className="text-xs text-red-400 mt-1">{errors.nickname.message}</p>}
         </div>
         <div>
-          <label className="block text-sm font-medium text-warm-text mb-1">昵称</label>
+          <label className="block text-sm font-medium text-warm-text mb-1">名字</label>
           <input
-            {...register('nickname')}
+            {...register('name')}
             className="w-full px-3 py-2 rounded-btn border border-warm-border bg-white focus:outline-none focus:ring-2 focus:ring-warm-primary/30 focus:border-warm-primary text-sm transition-colors"
-            placeholder="输入昵称"
+            placeholder="输入名字（选填）"
           />
         </div>
       </div>

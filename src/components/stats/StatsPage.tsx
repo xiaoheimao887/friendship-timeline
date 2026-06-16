@@ -154,7 +154,7 @@ export function StatsPage() {
                 <span className="text-xs font-medium text-warm-muted w-4">{i + 1}.</span>
                 <FriendAvatar friend={f} size="sm" />
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-warm-text truncate">{f.name}</p>
+                  <p className="text-sm font-medium text-warm-text truncate">{f.nickname}</p>
                   <p className="text-xs text-warm-muted">
                     认识 {getDuration(f.met_date)} · {formatDateShort(f.met_date)}
                   </p>

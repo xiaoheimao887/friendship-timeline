@@ -5,8 +5,8 @@
 CREATE TABLE friends (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   pin_hash TEXT NOT NULL DEFAULT '',
-  name TEXT NOT NULL,
-  nickname TEXT,
+  nickname TEXT NOT NULL,
+  name TEXT,
   avatar_url TEXT,
   tags TEXT[] DEFAULT '{}',
   met_date DATE NOT NULL,

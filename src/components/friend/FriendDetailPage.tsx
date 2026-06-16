@@ -67,9 +67,9 @@ export function FriendDetailPage() {
           <div className="flex-1 min-w-0">
             <div className="flex items-start justify-between">
               <div>
-                <h1 className="text-2xl font-semibold text-warm-text">{friend.name}</h1>
-                {friend.nickname && (
-                  <p className="text-sm text-warm-muted mt-0.5">昵称: {friend.nickname}</p>
+                <h1 className="text-2xl font-semibold text-warm-text">{friend.nickname}</h1>
+                {friend.name && (
+                  <p className="text-sm text-warm-muted mt-0.5">名字: {friend.name}</p>
                 )}
                 <p className="text-sm text-warm-accent mt-1">
                   认识 {duration}
@@ -122,7 +122,7 @@ export function FriendDetailPage() {
         onClose={() => setShowDelete(false)}
         onConfirm={handleDelete}
         title="删除朋友"
-        message={`确定要删除「${friend.name}」及其所有里程碑吗？此操作不可撤销。`}
+        message={`确定要删除「${friend.nickname}」及其所有里程碑吗？此操作不可撤销。`}
       />
 
       <Modal open={showEdit} onClose={() => setShowEdit(false)} title="编辑朋友">

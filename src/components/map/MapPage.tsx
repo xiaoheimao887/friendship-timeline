@@ -88,7 +88,7 @@ export function MapPage() {
                     <FriendAvatar friend={friend} size="sm" />
                     <div>
                       <Link to={`/friends/${friend.id}`} className="font-medium text-sm text-warm-primary hover:underline">
-                        {friend.name}
+                        {friend.nickname}
                       </Link>
                       <p className="text-xs text-warm-muted">{formatDateShort(friend.met_date)}</p>
                       {friend.met_place_name && (

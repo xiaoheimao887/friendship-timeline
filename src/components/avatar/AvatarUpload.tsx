@@ -3,7 +3,7 @@ import { FriendAvatar } from './FriendAvatar';
 import type { Friend } from '../../types';
 
 interface AvatarUploadProps {
-  friend: Pick<Friend, 'name' | 'avatar_url'>;
+  friend: Pick<Friend, 'nickname' | 'avatar_url'>;
   onUpload: (file: File) => void;
   onRemove: () => void;
   uploading?: boolean;

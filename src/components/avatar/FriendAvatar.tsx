@@ -3,7 +3,7 @@ import { getAnimalAvatar } from '../../utils/animal-avatar';
 import { ANIMALS } from './AnimalAvatars';
 
 interface FriendAvatarProps {
-  friend: Pick<Friend, 'name' | 'avatar_url'>;
+  friend: Pick<Friend, 'nickname' | 'avatar_url'> & { name?: string };
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }
@@ -17,14 +17,14 @@ export function FriendAvatar({ friend, size = 'md', className = '' }: FriendAvat
     return (
       <img
         src={friend.avatar_url}
-        alt={friend.name}
+        alt={friend.nickname}
         className={`rounded-full object-cover shrink-0 ${className}`}
         style={{ width: dimension, height: dimension }}
       />
     );
   }
 
-  const { animalIndex, primaryColor, secondaryColor } = getAnimalAvatar(friend.name);
+  const { animalIndex, primaryColor, secondaryColor } = getAnimalAvatar(friend.nickname);
   const AnimalComponent = ANIMALS[animalIndex];
 
   return (

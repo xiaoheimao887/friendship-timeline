@@ -25,8 +25,8 @@ export interface Milestone {
 
 export interface Friend {
   id: string;
-  name: string;
-  nickname?: string;
+  nickname: string;
+  name?: string;
   avatar_url?: string;
   tags: string[];
   met_date: string;
@@ -40,8 +40,8 @@ export interface Friend {
 }
 
 export interface FriendFormData {
-  name: string;
-  nickname?: string;
+  nickname: string;
+  name?: string;
   avatar_url?: string;
   tags: string[];
   met_date: string;
