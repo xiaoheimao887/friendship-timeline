@@ -33,7 +33,7 @@ export const useFriendStore = create<FriendStore>((set, get) => ({
       set({ friends, loading: false, initialized: true, pinHash });
     } catch (error) {
       console.error('Failed to load friends:', error);
-      set({ loading: false });
+      set({ friends: [], loading: false, initialized: true });
     }
   },
 
