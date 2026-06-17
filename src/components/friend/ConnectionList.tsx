@@ -17,7 +17,7 @@ export function ConnectionList({ friendId }: ConnectionListProps) {
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [selectedFriend, setSelectedFriend] = useState('');
-  const [relationType, setRelationType] = useState(CONNECTION_TYPES[0]);
+  const [relationType, setRelationType] = useState<string>(CONNECTION_TYPES[0]);
   const [search, setSearch] = useState('');
 
   const load = async () => {
