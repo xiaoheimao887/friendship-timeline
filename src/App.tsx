@@ -8,6 +8,7 @@ import { AddFriendPage } from './pages/AddFriendPage';
 import { MapPage } from './components/map/MapPage';
 import { StatsPage } from './components/stats/StatsPage';
 import { GraphPage } from './pages/GraphPage';
+import { PhotoWallPage } from './pages/PhotoWallPage';
 import { SetupPinPage } from './pages/SetupPinPage';
 import { ToastProvider } from './components/ui/ToastProvider';
 import { NotFound } from './pages/NotFound';
@@ -38,6 +39,7 @@ function AppContent() {
         <Route path="/map" element={<MapPage />} />
         <Route path="/stats" element={<StatsPage />} />
         <Route path="/graph" element={<GraphPage />} />
+        <Route path="/photos" element={<PhotoWallPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppShell>

@@ -30,6 +30,15 @@ export interface Thought {
   created_at: string;
 }
 
+export interface Photo {
+  id: string;
+  friend_id: string;
+  url: string;
+  caption?: string;
+  taken_at: string;
+  created_at: string;
+}
+
 export interface Friend {
   id: string;
   nickname: string;

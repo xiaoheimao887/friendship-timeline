@@ -92,4 +92,22 @@ CREATE POLICY "Allow all for thoughts" ON thoughts
 
 CREATE INDEX idx_thoughts_friend_id ON thoughts(friend_id);
 
+-- 10. 创建 photos 表
+CREATE TABLE IF NOT EXISTS photos (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  friend_id UUID NOT NULL REFERENCES friends(id) ON DELETE CASCADE,
+  url TEXT NOT NULL,
+  caption TEXT,
+  taken_at DATE NOT NULL DEFAULT CURRENT_DATE,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE photos ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all for photos" ON photos
+  FOR ALL USING (true) WITH CHECK (true);
+
+CREATE INDEX idx_photos_friend_id ON photos(friend_id);
+
+-- 11. 在 Supabase Dashboard > Storage 中创建 avatars bucket 和 photos bucket，设为 public
+
 -- 9. 在 Supabase Dashboard > Storage 中创建 avatars bucket，设为 public

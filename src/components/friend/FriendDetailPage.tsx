@@ -9,6 +9,7 @@ import { Modal } from '../ui/Modal';
 import { FriendForm } from './FriendForm';
 import { MilestoneList } from './MilestoneList';
 import { ThoughtList } from './ThoughtList';
+import { PhotoList } from './PhotoList';
 import { ConnectionList } from './ConnectionList';
 import { formatDate, getDuration } from '../../utils/date-utils';
 import { useToast } from '../ui/ToastProvider';
@@ -127,6 +128,11 @@ export function FriendDetailPage() {
         {/* Thoughts */}
         <div className="mt-8">
           <ThoughtList friendId={friend.id} />
+        </div>
+
+        {/* Photos */}
+        <div className="mt-8">
+          <PhotoList friendId={friend.id} />
         </div>
       </div>
 

@@ -4,6 +4,7 @@ const NAV_ITEMS = [
   { to: '/', icon: '🏠', label: '时间线' },
   { to: '/friends', icon: '👥', label: '朋友' },
   { to: '/graph', icon: '🔗', label: '图谱' },
+  { to: '/photos', icon: '🖼', label: '照片' },
   { to: '/map', icon: '🗺', label: '地图' },
   { to: '/stats', icon: '📊', label: '统计' },
 ];
