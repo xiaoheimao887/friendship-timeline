@@ -120,10 +120,14 @@ export function ConnectionList({ friendId }: ConnectionListProps) {
 
           <div>
             <label className="block text-sm font-medium text-warm-text mb-1">关系类型</label>
-            <select value={relationType} onChange={e => setRelationType(e.target.value)}
-              className="w-full px-3 py-2 rounded-btn border border-warm-border bg-white focus:outline-none focus:ring-2 focus:ring-warm-primary/30 focus:border-warm-primary text-sm">
-              {CONNECTION_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
-            </select>
+            <div className="flex gap-2">
+              <select value={relationType} onChange={e => setRelationType(e.target.value)}
+                className="flex-1 px-3 py-2 rounded-btn border border-warm-border bg-white focus:outline-none focus:ring-2 focus:ring-warm-primary/30 focus:border-warm-primary text-sm">
+                {CONNECTION_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+              </select>
+              <input value={relationType} onChange={e => setRelationType(e.target.value)}
+                className="flex-1 px-3 py-2 rounded-btn border border-warm-border bg-white focus:outline-none focus:ring-2 focus:ring-warm-primary/30 focus:border-warm-primary text-sm" placeholder="或自定义输入" />
+            </div>
           </div>
 
           <div className="flex justify-end gap-3 pt-2">

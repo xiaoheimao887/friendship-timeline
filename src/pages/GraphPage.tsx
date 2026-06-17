@@ -94,15 +94,20 @@ export function GraphPage() {
             if (!pos) return null;
             return (
               <g key={n.id}
-                onMouseDown={() => {
+                onMouseDown={(e) => {
+                  e.preventDefault();
                   setDragging(n.id);
                   const svg = document.querySelector('svg')!;
                   const rect = svg.getBoundingClientRect();
                   const scaleX = 800 / rect.width;
                   const scaleY = 500 / rect.height;
+                  const offsetX = e.clientX * scaleX - pos.x;
+                  const offsetY = e.clientY * scaleY - pos.y;
                   const handler = (ev: MouseEvent) => {
                     if (!ev.buttons) { setDragging(null); return; }
-                    setPositions(p => ({ ...p, [n.id]: { x: Math.max(30, Math.min(770, ev.clientX * scaleX)), y: Math.max(30, Math.min(470, ev.clientY * scaleY)) } }));
+                    const newX = Math.max(30, Math.min(770, ev.clientX * scaleX - offsetX));
+                    const newY = Math.max(30, Math.min(470, ev.clientY * scaleY - offsetY));
+                    setPositions(p => ({ ...p, [n.id]: { x: newX, y: newY } }));
                   };
                   const upHandler = () => { setDragging(null); document.removeEventListener('mousemove', handler); document.removeEventListener('mouseup', upHandler); };
                   document.addEventListener('mousemove', handler);
