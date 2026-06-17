@@ -146,18 +146,18 @@ export function FriendForm({ friend, onClose }: FriendFormProps) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-medium text-warm-text mb-1">认识日期 *</label>
-          <DatePicker
-            value={watch('met_date')}
-            onChange={(v) => setValue('met_date', v)}
-            required
-          />
-          {errors.met_date && <p className="text-xs text-red-400 mt-1">{errors.met_date.message}</p>}
-        </div>
-        <div>
-          <label className="block text-sm font-medium text-warm-text mb-1">关系状态</label>
+      <div>
+        <label className="block text-sm font-medium text-warm-text mb-1">认识日期 *</label>
+        <DatePicker
+          value={watch('met_date')}
+          onChange={(v) => setValue('met_date', v)}
+          required
+        />
+        {errors.met_date && <p className="text-xs text-red-400 mt-1">{errors.met_date.message}</p>}
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-warm-text mb-1">关系状态</label>
           <select
             {...register('relationship')}
             className="w-full px-3 py-2 rounded-btn border border-warm-border bg-white focus:outline-none focus:ring-2 focus:ring-warm-primary/30 focus:border-warm-primary text-sm transition-colors"
@@ -168,7 +168,6 @@ export function FriendForm({ friend, onClose }: FriendFormProps) {
             <option value="lost">已失联</option>
           </select>
         </div>
-      </div>
 
       <div>
         <label className="block text-sm font-medium text-warm-text mb-1">生日（选填）</label>
