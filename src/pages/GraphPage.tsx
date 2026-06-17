@@ -46,6 +46,8 @@ export function GraphPage() {
     return { nodes: friends, edges: edgeList };
   }, [friends, connections]);
 
+  const positionsRef = useRef<Record<string, { x: number; y: number }>>({});
+
   const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>({});
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
@@ -57,6 +59,7 @@ export function GraphPage() {
       const angle = (2 * Math.PI * i) / nodes.length - Math.PI / 2;
       pos[n.id] = { x: cx + radius * Math.cos(angle), y: cy + radius * Math.sin(angle) };
     });
+    positionsRef.current = pos;
     setPositions(pos);
   }, [nodes.length]);
 
@@ -71,12 +74,15 @@ export function GraphPage() {
       }
       const dx = (ev.clientX - d.mouseX) * d.scaleX;
       const dy = (ev.clientY - d.mouseY) * d.scaleY;
-      setPositions(q => {
-        const cur = q[d.id];
-        if (!cur) return q;
-        return { ...q, [d.id]: { x: Math.max(30, Math.min(770, cur.x + dx)), y: Math.max(30, Math.min(470, cur.y + dy)) } };
-      });
-      draggingRef.current = { ...d, mouseX: ev.clientX, mouseY: ev.clientY, startX: d.startX + dx, startY: d.startY + dy };
+      const cur = positionsRef.current[d.id];
+      if (!cur) return;
+      const newPos = {
+        x: Math.max(30, Math.min(770, cur.x + dx)),
+        y: Math.max(30, Math.min(470, cur.y + dy)),
+      };
+      positionsRef.current = { ...positionsRef.current, [d.id]: newPos };
+      setPositions(positionsRef.current);
+      draggingRef.current = { ...d, mouseX: ev.clientX, mouseY: ev.clientY };
     };
     const upHandler = () => {
       if (draggingRef.current) {
