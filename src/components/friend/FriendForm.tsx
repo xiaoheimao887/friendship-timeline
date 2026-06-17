@@ -31,6 +31,7 @@ export function FriendForm({ friend, onClose }: FriendFormProps) {
     defaultValues: friend ? {
       nickname: friend.nickname,
       name: friend.name || '',
+      birthday: friend.birthday || '',
       met_date: friend.met_date,
       current_location_name: friend.current_location_name || '',
       met_place_lat: friend.met_place_lat,
@@ -43,6 +44,7 @@ export function FriendForm({ friend, onClose }: FriendFormProps) {
     } : {
       name: '',
       nickname: '',
+      birthday: '',
       met_date: '',
       met_place_name: '',
       met_story: '',
@@ -166,6 +168,15 @@ export function FriendForm({ friend, onClose }: FriendFormProps) {
             <option value="lost">已失联</option>
           </select>
         </div>
+      </div>
+
+      <div>
+        <label className="block text-sm font-medium text-warm-text mb-1">生日（选填）</label>
+        <DatePicker
+          value={watch('birthday') || ''}
+          onChange={(v) => setValue('birthday', v)}
+        />
+        <p className="text-xs text-warm-muted mt-1">快到时会提醒你</p>
       </div>
 
       <div>

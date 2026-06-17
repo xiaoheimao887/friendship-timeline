@@ -77,6 +77,9 @@ export function FriendDetailPage() {
                 {friend.current_location_name && (
                   <p className="text-xs text-warm-muted mt-1">📍 {friend.current_location_name}</p>
                 )}
+                {friend.birthday && (
+                  <p className="text-xs text-warm-muted mt-1">🎂 {formatDate(friend.birthday)}</p>
+                )}
               </div>
               <div className="flex gap-2 shrink-0">
                 <button
