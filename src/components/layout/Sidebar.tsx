@@ -28,6 +28,7 @@ export function Sidebar() {
   const NAV_ITEMS = [
     { to: '/', icon: '🏠', label: '时间线' },
     { to: '/friends', icon: '👥', label: '朋友' },
+    { to: '/graph', icon: '🔗', label: '关系图谱' },
     { to: '/map', icon: '🗺', label: '地图' },
     { to: '/stats', icon: '📊', label: '统计' },
   ];
