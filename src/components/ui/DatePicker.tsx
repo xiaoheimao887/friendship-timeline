@@ -37,7 +37,7 @@ function SelectMenu({ value, options, placeholder, onChange }: SelectMenuProps) 
           ${!selected ? 'text-warm-muted' : 'text-warm-text'}
           ${open ? 'ring-2 ring-warm-primary/30 border-warm-primary' : ''}`}
       >
-        <span>{selected ? selected.label : placeholder}</span>
+        <span className="whitespace-nowrap">{selected ? selected.label : placeholder}</span>
         <svg className={`shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
           <path d="M3 5l3 3 3-3" />
         </svg>
