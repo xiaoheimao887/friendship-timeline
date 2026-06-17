@@ -1,4 +1,4 @@
-import { useMemo, useState, useEffect } from 'react';
+import { useMemo, useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useFriendStore } from '../store/useFriendStore';
 import { fetchAllConnections } from '../services/connectionService';
@@ -10,6 +10,15 @@ export function GraphPage() {
   const [connections, setConnections] = useState<Connection[]>([]);
   const [loading, setLoading] = useState(true);
   const [tooltip, setTooltip] = useState<{ x: number; y: number; friend: typeof friends[0] } | null>(null);
+  const draggingRef = useRef<{
+    id: string;
+    startX: number;
+    startY: number;
+    mouseX: number;
+    mouseY: number;
+    scaleX: number;
+    scaleY: number;
+  } | null>(null);
 
   useEffect(() => {
     const load = async () => {
@@ -38,7 +47,7 @@ export function GraphPage() {
   }, [friends, connections]);
 
   const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>({});
-  const [dragging, setDragging] = useState<string | null>(null);
+  const [draggingId, setDraggingId] = useState<string | null>(null);
 
   useEffect(() => {
     if (nodes.length === 0) return;
@@ -50,6 +59,35 @@ export function GraphPage() {
     });
     setPositions(pos);
   }, [nodes.length]);
+
+  useEffect(() => {
+    const handler = (ev: MouseEvent) => {
+      const d = draggingRef.current;
+      if (!d) return;
+      if (!ev.buttons) {
+        draggingRef.current = null;
+        setDraggingId(null);
+        return;
+      }
+      const dx = (ev.clientX - d.mouseX) * d.scaleX;
+      const dy = (ev.clientY - d.mouseY) * d.scaleY;
+      const newX = Math.max(30, Math.min(770, d.startX + dx));
+      const newY = Math.max(30, Math.min(470, d.startY + dy));
+      setPositions(q => ({ ...q, [d.id]: { x: newX, y: newY } }));
+    };
+    const upHandler = () => {
+      if (draggingRef.current) {
+        draggingRef.current = null;
+        setDraggingId(null);
+      }
+    };
+    document.addEventListener('mousemove', handler);
+    document.addEventListener('mouseup', upHandler);
+    return () => {
+      document.removeEventListener('mousemove', handler);
+      document.removeEventListener('mouseup', upHandler);
+    };
+  }, []);
 
   if (!useFriendStore.getState().initialized || loading) {
     return <div className="flex items-center justify-center py-20"><div className="w-8 h-8 border-2 border-warm-primary border-t-transparent rounded-full animate-spin" /></div>;
@@ -73,7 +111,7 @@ export function GraphPage() {
       </p>
 
       <div className="bg-white rounded-card shadow-card overflow-hidden relative" style={{ maxWidth: 800 }}>
-        <svg width="100%" height="600" viewBox="0 0 800 500" className="select-none" style={{ cursor: dragging ? 'grabbing' : 'grab' }}>
+        <svg width="100%" height="600" viewBox="0 0 800 500" className="select-none" style={{ cursor: draggingId ? 'grabbing' : 'grab' }}>
           {edges.map((e, i) => {
             const a = positions[e.source];
             const b = positions[e.target];
@@ -96,22 +134,18 @@ export function GraphPage() {
               <g key={n.id}
                 onMouseDown={(e) => {
                   e.preventDefault();
-                  setDragging(n.id);
                   const svg = document.querySelector('svg')!;
                   const rect = svg.getBoundingClientRect();
-                  const scaleX = 800 / rect.width;
-                  const scaleY = 500 / rect.height;
-                  const offsetX = e.clientX * scaleX - pos.x;
-                  const offsetY = e.clientY * scaleY - pos.y;
-                  const handler = (ev: MouseEvent) => {
-                    if (!ev.buttons) { setDragging(null); return; }
-                    const newX = Math.max(30, Math.min(770, ev.clientX * scaleX - offsetX));
-                    const newY = Math.max(30, Math.min(470, ev.clientY * scaleY - offsetY));
-                    setPositions(p => ({ ...p, [n.id]: { x: newX, y: newY } }));
+                  draggingRef.current = {
+                    id: n.id,
+                    startX: pos.x,
+                    startY: pos.y,
+                    mouseX: e.clientX,
+                    mouseY: e.clientY,
+                    scaleX: 800 / rect.width,
+                    scaleY: 500 / rect.height,
                   };
-                  const upHandler = () => { setDragging(null); document.removeEventListener('mousemove', handler); document.removeEventListener('mouseup', upHandler); };
-                  document.addEventListener('mousemove', handler);
-                  document.addEventListener('mouseup', upHandler);
+                  setDraggingId(n.id);
                 }}
                 onMouseEnter={(e) => {
                   const rect = document.querySelector('svg')!.getBoundingClientRect();
@@ -120,7 +154,7 @@ export function GraphPage() {
                 onMouseLeave={() => setTooltip(null)}
                 style={{ cursor: 'pointer' }}
               >
-                <circle cx={pos.x} cy={pos.y} r={dragging === n.id ? 24 : 20} fill="#FEF0E6" stroke="#D4826A" strokeWidth="2" />
+                <circle cx={pos.x} cy={pos.y} r={draggingId === n.id ? 24 : 20} fill="#FEF0E6" stroke="#D4826A" strokeWidth="2" />
                 <text x={pos.x} y={pos.y + 5} textAnchor="middle" fill="#D4826A" fontSize="12" fontWeight="600">{n.nickname.charAt(0)}</text>
                 <text x={pos.x} y={pos.y + 35} textAnchor="middle" fill="#4A3728" fontSize="11">{n.nickname}</text>
               </g>
