@@ -43,7 +43,7 @@ function SelectMenu({ value, options, placeholder, onChange }: SelectMenuProps) 
         </svg>
       </button>
       {open && (
-        <div className="absolute z-50 top-full mt-1 left-0 right-0 bg-white border border-warm-border rounded-card-sm shadow-card max-h-48 overflow-y-auto">
+        <div className="absolute z-50 top-full mt-1 left-0 right-0 bg-white border border-warm-border rounded-card-sm shadow-card max-h-[168px] overflow-y-auto">
           {options.map(opt => (
             <button
               key={opt.value}
