@@ -8,6 +8,7 @@ import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { Modal } from '../ui/Modal';
 import { FriendForm } from './FriendForm';
 import { MilestoneList } from './MilestoneList';
+import { ConnectionList } from './ConnectionList';
 import { formatDate, getDuration } from '../../utils/date-utils';
 import { useToast } from '../ui/ToastProvider';
 
@@ -122,6 +123,8 @@ export function FriendDetailPage() {
           <MilestoneList friendId={friend.id} />
         </div>
       </div>
+
+      <ConnectionList friendId={friend.id} />
 
       <ConfirmDialog
         open={showDelete}

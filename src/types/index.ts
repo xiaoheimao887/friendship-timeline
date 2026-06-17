@@ -72,3 +72,24 @@ export interface FilterState {
   dateRange: [string, string] | null;
   relationshipFilter: RelationshipStatus | 'all';
 }
+
+export interface Connection {
+  id: string;
+  friend_id_a: string;
+  friend_id_b: string;
+  relation_type: string;
+  created_at: string;
+}
+
+export const CONNECTION_TYPES = [
+  '大学同学',
+  '高中同学',
+  '初中同学',
+  '同事',
+  '介绍认识',
+  '情侣',
+  '家人',
+  '室友',
+  '同个圈子',
+  '网友',
+] as const;

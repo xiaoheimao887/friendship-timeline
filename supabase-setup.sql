@@ -64,4 +64,18 @@ ALTER TABLE auth ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all for auth" ON auth
   FOR ALL USING (true) WITH CHECK (true);
 
--- 7. 在 Supabase Dashboard > Storage 中创建 avatars bucket，设为 public
+-- 7. 创建 connections 表
+CREATE TABLE IF NOT EXISTS connections (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  friend_id_a UUID NOT NULL REFERENCES friends(id) ON DELETE CASCADE,
+  friend_id_b UUID NOT NULL REFERENCES friends(id) ON DELETE CASCADE,
+  relation_type TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  CONSTRAINT unique_connection UNIQUE (friend_id_a, friend_id_b)
+);
+
+ALTER TABLE connections ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all for connections" ON connections
+  FOR ALL USING (true) WITH CHECK (true);
+
+-- 8. 在 Supabase Dashboard > Storage 中创建 avatars bucket，设为 public

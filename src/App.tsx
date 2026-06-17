@@ -7,6 +7,7 @@ import { FriendDetailPage } from './components/friend/FriendDetailPage';
 import { AddFriendPage } from './pages/AddFriendPage';
 import { MapPage } from './components/map/MapPage';
 import { StatsPage } from './components/stats/StatsPage';
+import { GraphPage } from './pages/GraphPage';
 import { SetupPinPage } from './pages/SetupPinPage';
 import { ToastProvider } from './components/ui/ToastProvider';
 import { NotFound } from './pages/NotFound';
@@ -36,6 +37,7 @@ function AppContent() {
         <Route path="/friends/:id" element={<FriendDetailPage />} />
         <Route path="/map" element={<MapPage />} />
         <Route path="/stats" element={<StatsPage />} />
+        <Route path="/graph" element={<GraphPage />} />
         <Route path="*" element={<NotFound />} />
       </Routes>
     </AppShell>
