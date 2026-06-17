@@ -71,9 +71,12 @@ export function GraphPage() {
       }
       const dx = (ev.clientX - d.mouseX) * d.scaleX;
       const dy = (ev.clientY - d.mouseY) * d.scaleY;
-      const newX = Math.max(30, Math.min(770, d.startX + dx));
-      const newY = Math.max(30, Math.min(470, d.startY + dy));
-      setPositions(q => ({ ...q, [d.id]: { x: newX, y: newY } }));
+      setPositions(q => {
+        const cur = q[d.id];
+        if (!cur) return q;
+        return { ...q, [d.id]: { x: Math.max(30, Math.min(770, cur.x + dx)), y: Math.max(30, Math.min(470, cur.y + dy)) } };
+      });
+      draggingRef.current = { ...d, mouseX: ev.clientX, mouseY: ev.clientY, startX: d.startX + dx, startY: d.startY + dy };
     };
     const upHandler = () => {
       if (draggingRef.current) {
