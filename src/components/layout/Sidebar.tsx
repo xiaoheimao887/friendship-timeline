@@ -25,6 +25,13 @@ export function Sidebar() {
   const friends = useFriendStore(s => s.friends);
   const upcoming = useMemo(() => getUpcomingBirthdays(friends), [friends]);
 
+  const NAV_ITEMS = [
+    { to: '/', icon: '🏠', label: '时间线' },
+    { to: '/friends', icon: '👥', label: '朋友' },
+    { to: '/map', icon: '🗺', label: '地图' },
+    { to: '/stats', icon: '📊', label: '统计' },
+  ];
+
   return (
     <aside className="hidden md:flex flex-col w-60 min-h-screen bg-warm-sidebar border-r border-warm-border/50 p-5 shrink-0 sticky top-0">
       <div className="mb-8">
