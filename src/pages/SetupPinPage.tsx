@@ -37,9 +37,14 @@ export function SetupPinPage({ onComplete }: SetupPinPageProps) {
       const hash = await sha256(pin);
 
       if (mode === 'login') {
-        // Check if this PIN has a secondary password set up
+        // Check if this PIN exists
         const auth = await getAuthByPinHash(hash);
-        if (auth && auth.pin_key_hash) {
+        if (!auth) {
+          setError('该 PIN 码尚未注册，请先切换到"首次设置"');
+          setLoading(false);
+          return;
+        }
+        if (auth.pin_key_hash) {
           // Has secondary password, go to step 2
           setPinHashTemp(hash);
           setStep('key');
@@ -51,7 +56,14 @@ export function SetupPinPage({ onComplete }: SetupPinPageProps) {
         await loadFriends(hash);
         onComplete();
       } else {
-        // Setup mode: save pin hash temporarily, ask for secondary password
+        // Setup mode: check if PIN is already taken
+        const existing = await getAuthByPinHash(hash);
+        if (existing) {
+          setError('该 PIN 码已被使用，请更换其他 PIN');
+          setLoading(false);
+          return;
+        }
+        // Save pin hash temporarily, ask for secondary password
         setPinHashTemp(hash);
         setStep('key');
         setLoading(false);
