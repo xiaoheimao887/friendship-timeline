@@ -1,19 +1,67 @@
-import { useMemo } from 'react';
+import { useMemo, useState, useRef, useEffect } from 'react';
 
 interface DatePickerProps {
-  value: string;  // ISO date string YYYY-MM-DD
+  value: string;
   onChange: (value: string) => void;
   required?: boolean;
   className?: string;
 }
 
-function range(start: number, end: number): number[] {
-  return Array.from({ length: end - start + 1 }, (_, i) => start + i);
+interface SelectMenuProps {
+  value: number | '';
+  options: { value: number; label: string }[];
+  placeholder: string;
+  onChange: (v: number) => void;
 }
 
-const MONTHS = ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'];
+function SelectMenu({ value, options, placeholder, onChange }: SelectMenuProps) {
+  const [open, setOpen] = useState(false);
+  const ref = useRef<HTMLDivElement>(null);
 
-export function DatePicker({ value, onChange, required, className = '' }: DatePickerProps) {
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('mousedown', handler);
+    return () => document.removeEventListener('mousedown', handler);
+  }, []);
+
+  const selected = options.find(o => o.value === value);
+
+  return (
+    <div ref={ref} className="relative flex-1">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className={`w-full px-3 py-2 rounded-btn border border-warm-border bg-white text-sm transition-colors cursor-pointer text-left flex items-center justify-between gap-1
+          ${!selected ? 'text-warm-muted' : 'text-warm-text'}
+          ${open ? 'ring-2 ring-warm-primary/30 border-warm-primary' : ''}`}
+      >
+        <span>{selected ? selected.label : placeholder}</span>
+        <svg className={`shrink-0 transition-transform ${open ? 'rotate-180' : ''}`} width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" strokeWidth="1.5">
+          <path d="M3 5l3 3 3-3" />
+        </svg>
+      </button>
+      {open && (
+        <div className="absolute z-50 top-full mt-1 left-0 right-0 bg-white border border-warm-border rounded-card-sm shadow-card max-h-48 overflow-y-auto">
+          {options.map(opt => (
+            <button
+              key={opt.value}
+              type="button"
+              onClick={() => { onChange(opt.value); setOpen(false); }}
+              className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-warm-bg
+                ${opt.value === value ? 'bg-warm-primaryLight/40 text-warm-primary font-medium' : 'text-warm-text'}`}
+            >
+              {opt.label}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
+
+export function DatePicker({ value, onChange, className = '' }: DatePickerProps) {
   const [year, month, day] = value ? value.split('-').map(Number) : [0, 0, 0];
 
   const years = useMemo(() => {
@@ -48,38 +96,24 @@ export function DatePicker({ value, onChange, required, className = '' }: DatePi
 
   return (
     <div className={`flex gap-2 ${className}`}>
-      <select
+      <SelectMenu
         value={year || ''}
-        onChange={e => setYear(Number(e.target.value))}
-        className={`flex-1 px-3 py-2 rounded-btn border border-warm-border bg-white focus:outline-none focus:ring-2 focus:ring-warm-primary/30 focus:border-warm-primary text-sm transition-colors appearance-none cursor-pointer ${!year ? 'text-warm-muted' : 'text-warm-text'}`}
-      >
-        <option value="" disabled>年</option>
-        {years.map(y => (
-          <option key={y} value={y}>{y} 年</option>
-        ))}
-      </select>
-
-      <select
+        placeholder="年"
+        options={years.map(y => ({ value: y, label: `${y} 年` }))}
+        onChange={setYear}
+      />
+      <SelectMenu
         value={month || ''}
-        onChange={e => setMonth(Number(e.target.value))}
-        className={`flex-1 px-3 py-2 rounded-btn border border-warm-border bg-white focus:outline-none focus:ring-2 focus:ring-warm-primary/30 focus:border-warm-primary text-sm transition-colors appearance-none cursor-pointer ${!month ? 'text-warm-muted' : 'text-warm-text'}`}
-      >
-        <option value="" disabled>月</option>
-        {MONTHS.map((name, i) => (
-          <option key={i + 1} value={i + 1}>{name}</option>
-        ))}
-      </select>
-
-      <select
+        placeholder="月"
+        options={[1,2,3,4,5,6,7,8,9,10,11,12].map(m => ({ value: m, label: `${m} 月` }))}
+        onChange={setMonth}
+      />
+      <SelectMenu
         value={day || ''}
-        onChange={e => setDay(Number(e.target.value))}
-        className={`flex-1 px-3 py-2 rounded-btn border border-warm-border bg-white focus:outline-none focus:ring-2 focus:ring-warm-primary/30 focus:border-warm-primary text-sm transition-colors appearance-none cursor-pointer ${!day ? 'text-warm-muted' : 'text-warm-text'}`}
-      >
-        <option value="" disabled>日</option>
-        {range(1, daysInMonth).map(d => (
-          <option key={d} value={d}>{d} 日</option>
-        ))}
-      </select>
+        placeholder="日"
+        options={Array.from({ length: daysInMonth }, (_, i) => ({ value: i + 1, label: `${i + 1} 日` }))}
+        onChange={setDay}
+      />
     </div>
   );
 }
