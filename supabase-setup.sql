@@ -78,4 +78,18 @@ ALTER TABLE connections ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Allow all for connections" ON connections
   FOR ALL USING (true) WITH CHECK (true);
 
--- 8. 在 Supabase Dashboard > Storage 中创建 avatars bucket，设为 public
+-- 8. 创建 thoughts 表（随想，非正式记录）
+CREATE TABLE IF NOT EXISTS thoughts (
+  id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+  friend_id UUID NOT NULL REFERENCES friends(id) ON DELETE CASCADE,
+  content TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+ALTER TABLE thoughts ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow all for thoughts" ON thoughts
+  FOR ALL USING (true) WITH CHECK (true);
+
+CREATE INDEX idx_thoughts_friend_id ON thoughts(friend_id);
+
+-- 9. 在 Supabase Dashboard > Storage 中创建 avatars bucket，设为 public

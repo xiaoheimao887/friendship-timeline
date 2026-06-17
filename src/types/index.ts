@@ -23,6 +23,13 @@ export interface Milestone {
   created_at: string;
 }
 
+export interface Thought {
+  id: string;
+  friend_id: string;
+  content: string;
+  created_at: string;
+}
+
 export interface Friend {
   id: string;
   nickname: string;

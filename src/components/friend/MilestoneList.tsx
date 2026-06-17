@@ -1,29 +1,40 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { fetchMilestones, createMilestone, updateMilestone, deleteMilestone } from '../../services/milestoneService';
+import { fetchThoughts, deleteThought } from '../../services/thoughtService';
 import { Modal } from '../ui/Modal';
 import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { formatDate } from '../../utils/date-utils';
 import { useToast } from '../ui/ToastProvider';
 import { DatePicker } from '../ui/DatePicker';
-import type { Milestone, MilestoneFormData } from '../../types';
+import { ThoughtInput } from './ThoughtInput';
+import type { Milestone, MilestoneFormData, Thought } from '../../types';
 
 interface MilestoneListProps {
   friendId: string;
 }
 
+type TimelineItem =
+  | { kind: 'milestone'; data: Milestone }
+  | { kind: 'thought'; data: Thought };
+
 export function MilestoneList({ friendId }: MilestoneListProps) {
   const { showToast } = useToast();
   const [milestones, setMilestones] = useState<Milestone[]>([]);
+  const [thoughts, setThoughts] = useState<Thought[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAdd, setShowAdd] = useState(false);
   const [editing, setEditing] = useState<Milestone | null>(null);
-  const [deleting, setDeleting] = useState<Milestone | null>(null);
+  const [deleting, setDeleting] = useState<TimelineItem | null>(null);
 
   const load = async () => {
     setLoading(true);
     try {
-      const data = await fetchMilestones(friendId);
-      setMilestones(data);
+      const [ms, ts] = await Promise.all([
+        fetchMilestones(friendId),
+        fetchThoughts(friendId),
+      ]);
+      setMilestones(ms);
+      setThoughts(ts);
     } catch {
       // ignore
     } finally {
@@ -32,6 +43,20 @@ export function MilestoneList({ friendId }: MilestoneListProps) {
   };
 
   useEffect(() => { load(); }, [friendId]);
+
+  const timeline: TimelineItem[] = useMemo(() => {
+    const items: TimelineItem[] = [
+      ...milestones.map(m => ({ kind: 'milestone' as const, data: m })),
+      ...thoughts.map(t => ({ kind: 'thought' as const, data: t })),
+    ];
+    items.sort((a, b) => {
+      const da = a.kind === 'milestone' ? a.data.date : a.data.created_at.slice(0, 10);
+      const db = b.kind === 'milestone' ? b.data.date : b.data.created_at.slice(0, 10);
+      // Most recent first
+      return db.localeCompare(da);
+    });
+    return items;
+  }, [milestones, thoughts]);
 
   const handleCreate = async (data: MilestoneFormData) => {
     try {
@@ -58,7 +83,11 @@ export function MilestoneList({ friendId }: MilestoneListProps) {
   const handleDelete = async () => {
     if (!deleting) return;
     try {
-      await deleteMilestone(deleting.id);
+      if (deleting.kind === 'milestone') {
+        await deleteMilestone(deleting.data.id);
+      } else {
+        await deleteThought(deleting.data.id);
+      }
       showToast('已删除');
       setDeleting(null);
       load();
@@ -70,7 +99,7 @@ export function MilestoneList({ friendId }: MilestoneListProps) {
   if (loading) {
     return (
       <div>
-        <h2 className="text-sm font-semibold text-warm-muted uppercase tracking-wider mb-3">里程碑</h2>
+        <h2 className="text-sm font-semibold text-warm-muted uppercase tracking-wider mb-3">回忆</h2>
         <p className="text-sm text-warm-muted">加载中...</p>
       </div>
     );
@@ -79,7 +108,7 @@ export function MilestoneList({ friendId }: MilestoneListProps) {
   return (
     <div>
       <div className="flex items-center justify-between mb-3">
-        <h2 className="text-sm font-semibold text-warm-muted uppercase tracking-wider">里程碑</h2>
+        <h2 className="text-sm font-semibold text-warm-muted uppercase tracking-wider">回忆</h2>
         <button
           onClick={() => setShowAdd(true)}
           className="text-xs text-warm-primary hover:text-warm-primary/80 transition-colors"
@@ -88,38 +117,64 @@ export function MilestoneList({ friendId }: MilestoneListProps) {
         </button>
       </div>
 
-      {milestones.length === 0 ? (
+      {/* Thought input */}
+      <div className="mb-4 px-3 py-2 rounded-btn bg-warm-bg/60 border border-warm-border/40">
+        <ThoughtInput friendId={friendId} onCreated={load} />
+      </div>
+
+      {timeline.length === 0 ? (
         <p className="text-sm text-warm-muted pl-4 border-l-2 border-warm-border py-2">
-          还没有里程碑记录
+          还没有回忆记录
         </p>
       ) : (
         <div className="space-y-3">
-          {milestones.map(m => (
-            <div key={m.id} className="pl-4 border-l-2 border-warm-primaryLight group">
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-xs text-warm-muted">{formatDate(m.date)}</p>
-                  <p className="text-sm font-medium text-warm-text mt-0.5">{m.title}</p>
-                  {m.description && (
-                    <p className="text-sm text-warm-muted mt-0.5">{m.description}</p>
-                  )}
-                </div>
-                <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          {timeline.map(item => (
+            item.kind === 'thought' ? (
+              <div key={item.data.id} className="pl-4 border-l-2 border-warm-accent/30 group">
+                <div className="flex items-start justify-between">
+                  <div className="flex-1">
+                    <p className="text-xs text-warm-muted/70">
+                      {formatDate(item.data.created_at.slice(0, 10))}
+                    </p>
+                    <p className="text-sm text-warm-text mt-0.5 italic leading-relaxed">
+                      "{item.data.content}"
+                    </p>
+                  </div>
                   <button
-                    onClick={() => setEditing(m)}
-                    className="text-xs text-warm-muted hover:text-warm-primary transition-colors px-1"
-                  >
-                    编辑
-                  </button>
-                  <button
-                    onClick={() => setDeleting(m)}
-                    className="text-xs text-warm-muted hover:text-red-400 transition-colors px-1"
+                    onClick={() => setDeleting(item)}
+                    className="text-xs text-warm-muted hover:text-red-400 transition-colors px-1 opacity-0 group-hover:opacity-100 shrink-0"
                   >
                     删除
                   </button>
                 </div>
               </div>
-            </div>
+            ) : (
+              <div key={item.data.id} className="pl-4 border-l-2 border-warm-primaryLight group">
+                <div className="flex items-start justify-between">
+                  <div>
+                    <p className="text-xs text-warm-muted">{formatDate(item.data.date)}</p>
+                    <p className="text-sm font-medium text-warm-text mt-0.5">{item.data.title}</p>
+                    {item.data.description && (
+                      <p className="text-sm text-warm-muted mt-0.5">{item.data.description}</p>
+                    )}
+                  </div>
+                  <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => setEditing(item.data)}
+                      className="text-xs text-warm-muted hover:text-warm-primary transition-colors px-1"
+                    >
+                      编辑
+                    </button>
+                    <button
+                      onClick={() => setDeleting(item)}
+                      className="text-xs text-warm-muted hover:text-red-400 transition-colors px-1"
+                    >
+                      删除
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )
           ))}
         </div>
       )}
@@ -145,8 +200,12 @@ export function MilestoneList({ friendId }: MilestoneListProps) {
         open={!!deleting}
         onClose={() => setDeleting(null)}
         onConfirm={handleDelete}
-        title="删除里程碑"
-        message={`确定要删除「${deleting?.title}」吗？`}
+        title={deleting?.kind === 'thought' ? '删除随想' : '删除里程碑'}
+        message={
+          deleting?.kind === 'thought'
+            ? `确定要删除这条随想吗？`
+            : `确定要删除「${(deleting?.data as Milestone)?.title || ''}」吗？`
+        }
       />
     </div>
   );
