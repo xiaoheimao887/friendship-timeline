@@ -8,6 +8,7 @@ import { ConfirmDialog } from '../ui/ConfirmDialog';
 import { Modal } from '../ui/Modal';
 import { FriendForm } from './FriendForm';
 import { MilestoneList } from './MilestoneList';
+import { ThoughtList } from './ThoughtList';
 import { ConnectionList } from './ConnectionList';
 import { formatDate, getDuration } from '../../utils/date-utils';
 import { useToast } from '../ui/ToastProvider';
@@ -121,6 +122,11 @@ export function FriendDetailPage() {
         {/* Milestones */}
         <div className="mt-8">
           <MilestoneList friendId={friend.id} />
+        </div>
+
+        {/* Thoughts */}
+        <div className="mt-8">
+          <ThoughtList friendId={friend.id} />
         </div>
       </div>
 
