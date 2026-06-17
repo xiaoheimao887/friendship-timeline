@@ -54,7 +54,6 @@ export function GraphPage() {
   const [positions, setPositions] = useState<Record<string, { x: number; y: number }>>({});
   const [draggingId, setDraggingId] = useState<string | null>(null);
 
-  // Initialize circular layout when node count changes
   useEffect(() => {
     if (nodes.length === 0) return;
     const cx = SVG_W / 2, cy = SVG_H / 2, radius = Math.min(180, nodes.length * 25);
@@ -67,7 +66,6 @@ export function GraphPage() {
     setPositions(pos);
   }, [nodes.length]);
 
-  // Convert screen pixel coords to world coords (accounts for viewBox mapping + pan/zoom)
   const screenToWorld = useCallback((clientX: number, clientY: number) => {
     const svg = svgRef.current;
     if (!svg) return { x: 0, y: 0 };
@@ -83,12 +81,23 @@ export function GraphPage() {
     };
   }, []);
 
+  const screenToSVG = useCallback((clientX: number, clientY: number) => {
+    const svg = svgRef.current;
+    if (!svg) return { x: 0, y: 0 };
+    const pt = svg.createSVGPoint();
+    pt.x = clientX;
+    pt.y = clientY;
+    const ctm = svg.getScreenCTM();
+    if (!ctm) return { x: 0, y: 0 };
+    return pt.matrixTransform(ctm.inverse());
+  }, []);
+
   const nodeDragRef = useRef<{
     nodeId: string;
     startX: number;
     startY: number;
-    mouseWorldX: number;
-    mouseWorldY: number;
+    pointerWorldX: number;
+    pointerWorldY: number;
   } | null>(null);
 
   const panDragRef = useRef<{
@@ -98,7 +107,23 @@ export function GraphPage() {
     startSvgY: number;
   } | null>(null);
 
-  // Global mouse handlers for drag & pan
+  // Touch pinch state
+  const pinchRef = useRef<{
+    startDist: number;
+    startZoom: number;
+    startPan: { x: number; y: number };
+    centerWorld: { x: number; y: number };
+  } | null>(null);
+
+  const getTouchDist = (touches: React.TouchList) => {
+    const t0 = touches[0];
+    const t1 = touches[1];
+    const dx = t0.clientX - t1.clientX;
+    const dy = t0.clientY - t1.clientY;
+    return Math.sqrt(dx * dx + dy * dy);
+  };
+
+  // Mouse move + up handlers
   useEffect(() => {
     const handleMove = (ev: MouseEvent) => {
       const nd = nodeDragRef.current;
@@ -109,8 +134,8 @@ export function GraphPage() {
           return;
         }
         const world = screenToWorld(ev.clientX, ev.clientY);
-        const dx = world.x - nd.mouseWorldX;
-        const dy = world.y - nd.mouseWorldY;
+        const dx = world.x - nd.pointerWorldX;
+        const dy = world.y - nd.pointerWorldY;
         const newX = Math.max(30, Math.min(SVG_W - 30, nd.startX + dx));
         const newY = Math.max(30, Math.min(SVG_H - 30, nd.startY + dy));
         positionsRef.current = { ...positionsRef.current, [nd.nodeId]: { x: newX, y: newY } };
@@ -124,14 +149,7 @@ export function GraphPage() {
           panDragRef.current = null;
           return;
         }
-        const svg = svgRef.current;
-        if (!svg) return;
-        const pt = svg.createSVGPoint();
-        pt.x = ev.clientX;
-        pt.y = ev.clientY;
-        const ctm = svg.getScreenCTM();
-        if (!ctm) return;
-        const svgPt = pt.matrixTransform(ctm.inverse());
+        const svgPt = screenToSVG(ev.clientX, ev.clientY);
         const newPan = {
           x: pd.startPanX + svgPt.x - pd.startSvgX,
           y: pd.startPanY + svgPt.y - pd.startSvgY,
@@ -155,26 +173,138 @@ export function GraphPage() {
       document.removeEventListener('mousemove', handleMove);
       document.removeEventListener('mouseup', handleUp);
     };
+  }, [screenToWorld, screenToSVG]);
+
+  const startNodeDrag = useCallback((clientX: number, clientY: number, nodeId: string) => {
+    const world = screenToWorld(clientX, clientY);
+    const nodePos = positionsRef.current[nodeId];
+    if (!nodePos) return;
+    nodeDragRef.current = {
+      nodeId,
+      startX: nodePos.x,
+      startY: nodePos.y,
+      pointerWorldX: world.x,
+      pointerWorldY: world.y,
+    };
+    setDraggingId(nodeId);
   }, [screenToWorld]);
 
-  // Wheel zoom centered on cursor
-  const handleWheel = useCallback((e: React.WheelEvent) => {
-    e.preventDefault();
-    const svg = svgRef.current;
-    if (!svg) return;
-    const pt = svg.createSVGPoint();
-    pt.x = e.clientX;
-    pt.y = e.clientY;
-    const ctm = svg.getScreenCTM();
-    if (!ctm) return;
-    const svgPt = pt.matrixTransform(ctm.inverse());
+  const startPan = useCallback((clientX: number, clientY: number) => {
+    const svgPt = screenToSVG(clientX, clientY);
+    panDragRef.current = {
+      startPanX: panRef.current.x,
+      startPanY: panRef.current.y,
+      startSvgX: svgPt.x,
+      startSvgY: svgPt.y,
+    };
+  }, [screenToSVG]);
 
+  const startPinch = useCallback((touches: React.TouchList) => {
+    const dist = getTouchDist(touches);
+    const midX = (touches[0].clientX + touches[1].clientX) / 2;
+    const midY = (touches[0].clientY + touches[1].clientY) / 2;
+    const svgPt = screenToSVG(midX, midY);
     const worldX = (svgPt.x - panRef.current.x) / zoomRef.current;
     const worldY = (svgPt.y - panRef.current.y) / zoomRef.current;
+    pinchRef.current = {
+      startDist: dist,
+      startZoom: zoomRef.current,
+      startPan: { x: panRef.current.x, y: panRef.current.y },
+      centerWorld: { x: worldX, y: worldY },
+    };
+  }, [screenToSVG]);
 
+  const updatePinch = useCallback((touches: React.TouchList) => {
+    const pin = pinchRef.current;
+    if (!pin) return;
+    const dist = getTouchDist(touches);
+    const midX = (touches[0].clientX + touches[1].clientX) / 2;
+    const midY = (touches[0].clientY + touches[1].clientY) / 2;
+    const svgPt = screenToSVG(midX, midY);
+    const newZoom = Math.max(0.2, Math.min(3, pin.startZoom * (dist / pin.startDist)));
+    const newPan = {
+      x: svgPt.x - pin.centerWorld.x * newZoom,
+      y: svgPt.y - pin.centerWorld.y * newZoom,
+    };
+    zoomRef.current = newZoom;
+    panRef.current = newPan;
+    setZoom(newZoom);
+    setPan(newPan);
+  }, [screenToSVG]);
+
+  // Touch event handlers on the SVG wrapper div
+  const handleTouchStart = useCallback((e: React.TouchEvent) => {
+    const touches = e.touches;
+    if (touches.length === 2) {
+      e.preventDefault();
+      nodeDragRef.current = null;
+      setDraggingId(null);
+      panDragRef.current = null;
+      startPinch(touches);
+      return;
+    }
+    if (touches.length === 1) {
+      const touch = touches[0];
+      const target = document.elementFromPoint(touch.clientX, touch.clientY);
+      const nodeGroup = target?.closest('[data-node-id]');
+      if (nodeGroup) {
+        e.preventDefault();
+        const nodeId = nodeGroup.getAttribute('data-node-id')!;
+        startNodeDrag(touch.clientX, touch.clientY, nodeId);
+      } else {
+        startPan(touch.clientX, touch.clientY);
+      }
+    }
+  }, [startNodeDrag, startPan, startPinch]);
+
+  const handleTouchMove = useCallback((e: React.TouchEvent) => {
+    const touches = e.touches;
+    if (touches.length === 2 && pinchRef.current) {
+      e.preventDefault();
+      updatePinch(touches);
+      return;
+    }
+    if (touches.length === 1) {
+      const touch = touches[0];
+      const nd = nodeDragRef.current;
+      if (nd) {
+        e.preventDefault();
+        const world = screenToWorld(touch.clientX, touch.clientY);
+        const dx = world.x - nd.pointerWorldX;
+        const dy = world.y - nd.pointerWorldY;
+        const newX = Math.max(30, Math.min(SVG_W - 30, nd.startX + dx));
+        const newY = Math.max(30, Math.min(SVG_H - 30, nd.startY + dy));
+        positionsRef.current = { ...positionsRef.current, [nd.nodeId]: { x: newX, y: newY } };
+        setPositions(positionsRef.current);
+        return;
+      }
+      const pd = panDragRef.current;
+      if (pd) {
+        const svgPt = screenToSVG(touch.clientX, touch.clientY);
+        const newPan = {
+          x: pd.startPanX + svgPt.x - pd.startSvgX,
+          y: pd.startPanY + svgPt.y - pd.startSvgY,
+        };
+        panRef.current = newPan;
+        setPan(newPan);
+      }
+    }
+  }, [screenToWorld, screenToSVG, updatePinch]);
+
+  const handleTouchEnd = useCallback(() => {
+    nodeDragRef.current = null;
+    setDraggingId(null);
+    panDragRef.current = null;
+    pinchRef.current = null;
+  }, []);
+
+  const handleWheel = useCallback((e: React.WheelEvent) => {
+    e.preventDefault();
+    const svgPt = screenToSVG(e.clientX, e.clientY);
+    const worldX = (svgPt.x - panRef.current.x) / zoomRef.current;
+    const worldY = (svgPt.y - panRef.current.y) / zoomRef.current;
     const factor = e.deltaY > 0 ? 0.9 : 1.1;
     const newZoom = Math.max(0.2, Math.min(3, zoomRef.current * factor));
-
     const newPan = {
       x: svgPt.x - worldX * newZoom,
       y: svgPt.y - worldY * newZoom,
@@ -183,7 +313,7 @@ export function GraphPage() {
     panRef.current = newPan;
     setZoom(newZoom);
     setPan(newPan);
-  }, []);
+  }, [screenToSVG]);
 
   const resetView = useCallback(() => {
     zoomRef.current = 1;
@@ -216,7 +346,7 @@ export function GraphPage() {
         <div>
           <h1 className="text-xl font-semibold text-warm-text">🔗 关系图谱</h1>
           <p className="text-sm text-warm-muted">
-            共 {nodes.length} 位朋友，{edges.length} 条关联 · 滚轮缩放 · 拖拽背景平移 · 拖拽节点调整位置
+            共 {nodes.length} 位朋友，{edges.length} 条关联 · 双指缩放 · 拖拽平移 · 拖拽节点调整位置
           </p>
         </div>
         <div className="flex items-center gap-2">
@@ -229,7 +359,14 @@ export function GraphPage() {
         </div>
       </div>
 
-      <div className="bg-white rounded-card shadow-card overflow-hidden relative" style={{ maxWidth: 800 }}>
+      <div
+        className="bg-white rounded-card shadow-card overflow-hidden relative"
+        style={{ maxWidth: 800, touchAction: 'none' }}
+        onTouchStart={handleTouchStart}
+        onTouchMove={handleTouchMove}
+        onTouchEnd={handleTouchEnd}
+        onTouchCancel={handleTouchEnd}
+      >
         <svg
           ref={svgRef}
           width="100%"
@@ -240,20 +377,11 @@ export function GraphPage() {
           onWheel={handleWheel}
           onMouseDown={(e) => {
             if (e.button !== 0) return;
-            const svg = svgRef.current;
-            if (!svg) return;
-            const pt = svg.createSVGPoint();
-            pt.x = e.clientX;
-            pt.y = e.clientY;
-            const ctm = svg.getScreenCTM();
-            if (!ctm) return;
-            const svgPt = pt.matrixTransform(ctm.inverse());
-            panDragRef.current = {
-              startPanX: panRef.current.x,
-              startPanY: panRef.current.y,
-              startSvgX: svgPt.x,
-              startSvgY: svgPt.y,
-            };
+            const target = e.target as Element;
+            const nodeGroup = target.closest('[data-node-id]');
+            if (!nodeGroup) {
+              startPan(e.clientX, e.clientY);
+            }
           }}
         >
           <g transform={`translate(${pan.x}, ${pan.y}) scale(${zoom})`}>
@@ -277,27 +405,18 @@ export function GraphPage() {
               if (!pos) return null;
               return (
                 <g key={n.id}
+                  data-node-id={n.id}
                   onMouseDown={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
-                    const world = screenToWorld(e.clientX, e.clientY);
-                    const nodePos = positionsRef.current[n.id];
-                    if (!nodePos) return;
-                    nodeDragRef.current = {
-                      nodeId: n.id,
-                      startX: nodePos.x,
-                      startY: nodePos.y,
-                      mouseWorldX: world.x,
-                      mouseWorldY: world.y,
-                    };
-                    setDraggingId(n.id);
+                    startNodeDrag(e.clientX, e.clientY, n.id);
                   }}
                   onMouseEnter={(e) => {
                     const rect = svgRef.current?.getBoundingClientRect();
                     if (rect) setTooltip({ x: e.clientX - rect.left, y: e.clientY - rect.top - 10, friend: n });
                   }}
                   onMouseLeave={() => setTooltip(null)}
-                  style={{ cursor: 'pointer' }}
+                  style={{ cursor: 'pointer', touchAction: 'none' }}
                 >
                   <circle cx={pos.x} cy={pos.y} r={draggingId === n.id ? 24 : 20} fill="#FEF0E6" stroke="#D4826A" strokeWidth="2" />
                   <text x={pos.x} y={pos.y + 5} textAnchor="middle" fill="#D4826A" fontSize="12" fontWeight="600">{n.nickname.charAt(0)}</text>
