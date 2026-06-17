@@ -105,6 +105,15 @@ export function FriendDetailPage() {
                 <TagBadge key={tag} tag={tag} />
               ))}
             </div>
+            {friend.custom_fields && Object.keys(friend.custom_fields).length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1">
+                {Object.entries(friend.custom_fields).map(([key, value]) => (
+                  <span key={key} className="text-xs text-warm-muted">
+                    <span className="font-medium text-warm-text/60">{key}:</span> {value}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

@@ -26,6 +26,9 @@ export function FriendForm({ friend, onClose }: FriendFormProps) {
   const [avatarFile, setAvatarFile] = useState<File | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | undefined>(friend?.avatar_url);
   const [newTag, setNewTag] = useState('');
+  const [customFields, setCustomFields] = useState<Record<string, string>>(friend?.custom_fields || {});
+  const [newFieldKey, setNewFieldKey] = useState('');
+  const [newFieldValue, setNewFieldValue] = useState('');
 
   const { register, handleSubmit, watch, setValue, formState: { errors, isSubmitting } } = useForm<FriendFormData>({
     defaultValues: friend ? {
@@ -67,6 +70,15 @@ export function FriendForm({ friend, onClose }: FriendFormProps) {
     setValue('tags', tags.filter(t => t !== tag));
   };
 
+  const addField = () => {
+    const key = newFieldKey.trim();
+    const val = newFieldValue.trim();
+    if (!key || !val) return;
+    setCustomFields(prev => ({ ...prev, [key]: val }));
+    setNewFieldKey('');
+    setNewFieldValue('');
+  };
+
   const handleUpload = async (file: File) => {
     setAvatarFile(file);
     setUploading(true);
@@ -101,7 +113,7 @@ export function FriendForm({ friend, onClose }: FriendFormProps) {
         if (oldPath) deleteAvatar(oldPath).catch(() => {});
       }
 
-      const formData = { ...data, avatar_url: finalAvatarUrl };
+      const formData = { ...data, avatar_url: finalAvatarUrl, custom_fields: customFields };
 
       if (friend) {
         await updateFriend(friend.id, formData);
@@ -247,6 +259,65 @@ export function FriendForm({ friend, onClose }: FriendFormProps) {
               + {t}
             </button>
           ))}
+        </div>
+      </div>
+
+      {/* Custom fields */}
+      <div>
+        <label className="block text-sm font-medium text-warm-text mb-2">自定义字段</label>
+        {Object.keys(customFields).length > 0 && (
+          <div className="space-y-2 mb-3">
+            {Object.entries(customFields).map(([key, value]) => (
+              <div key={key} className="flex gap-2">
+                <input
+                  value={key}
+                  readOnly
+                  className="w-28 px-2 py-1.5 rounded-btn border border-warm-border/50 bg-warm-bg/50 text-xs text-warm-muted"
+                />
+                <input
+                  value={value}
+                  onChange={e => setCustomFields(prev => ({ ...prev, [key]: e.target.value }))}
+                  className="flex-1 px-2 py-1.5 rounded-btn border border-warm-border bg-white focus:outline-none focus:ring-2 focus:ring-warm-primary/30 focus:border-warm-primary text-sm"
+                  placeholder="值"
+                />
+                <button
+                  type="button"
+                  onClick={() => setCustomFields(prev => {
+                    const next = { ...prev };
+                    delete next[key];
+                    return next;
+                  })}
+                  className="shrink-0 w-8 h-8 flex items-center justify-center text-warm-muted hover:text-red-400 transition-colors"
+                >
+                  ✕
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+        <div className="flex gap-2">
+          <input
+            value={newFieldKey}
+            onChange={e => setNewFieldKey(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); }}}
+            className="w-28 px-2 py-1.5 rounded-btn border border-warm-border bg-white focus:outline-none focus:ring-2 focus:ring-warm-primary/30 focus:border-warm-primary text-sm"
+            placeholder="字段名"
+          />
+          <input
+            value={newFieldValue}
+            onChange={e => setNewFieldValue(e.target.value)}
+            onKeyDown={e => { if (e.key === 'Enter') { e.preventDefault(); addField(); } }}
+            className="flex-1 px-2 py-1.5 rounded-btn border border-warm-border bg-white focus:outline-none focus:ring-2 focus:ring-warm-primary/30 focus:border-warm-primary text-sm"
+            placeholder="值（输入后按回车添加）"
+          />
+          <button
+            type="button"
+            onClick={addField}
+            disabled={!newFieldKey.trim() || !newFieldValue.trim()}
+            className="shrink-0 px-3 py-1.5 rounded-btn bg-warm-primaryLight text-warm-primary text-xs hover:bg-warm-primaryLight/80 transition-colors disabled:opacity-30"
+          >
+            添加
+          </button>
         </div>
       </div>
 

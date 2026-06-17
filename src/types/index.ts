@@ -46,6 +46,7 @@ export interface Friend {
   birthday?: string;
   avatar_url?: string;
   tags: string[];
+  custom_fields: Record<string, string>;
   met_date: string;
   met_place_name?: string;
   met_place_lat?: number;
@@ -65,6 +66,7 @@ export interface FriendFormData {
   birthday?: string;
   avatar_url?: string;
   tags: string[];
+  custom_fields: Record<string, string>;
   met_date: string;
   met_place_name?: string;
   met_place_lat?: number;
