@@ -1,15 +1,29 @@
 import { NavLink } from 'react-router-dom';
 import { useFriendStore } from '../../store/useFriendStore';
+import { useMemo } from 'react';
+import { parseISO, format } from 'date-fns';
 
-const NAV_ITEMS = [
-  { to: '/', icon: '🏠', label: '时间线' },
-  { to: '/friends', icon: '👥', label: '朋友' },
-  { to: '/map', icon: '🗺', label: '地图' },
-  { to: '/stats', icon: '📊', label: '统计' },
-];
+function getUpcomingBirthdays(friends: { nickname: string; birthday?: string }[]): { nickname: string; date: string; daysLeft: number }[] {
+  const today = new Date();
+  const results: { nickname: string; date: string; daysLeft: number }[] = [];
+
+  friends.forEach(f => {
+    if (!f.birthday) return;
+    const bd = parseISO(f.birthday);
+    const thisYear = new Date(today.getFullYear(), bd.getMonth(), bd.getDate());
+    const diff = Math.ceil((thisYear.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    const daysLeft = diff >= 0 ? diff : Math.ceil((new Date(today.getFullYear() + 1, bd.getMonth(), bd.getDate()).getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+    if (daysLeft >= 0 && daysLeft <= 30) {
+      results.push({ nickname: f.nickname, date: format(bd, 'M月d日'), daysLeft });
+    }
+  });
+
+  return results.sort((a, b) => a.daysLeft - b.daysLeft);
+}
 
 export function Sidebar() {
   const friends = useFriendStore(s => s.friends);
+  const upcoming = useMemo(() => getUpcomingBirthdays(friends), [friends]);
 
   return (
     <aside className="hidden md:flex flex-col w-60 min-h-screen bg-warm-sidebar border-r border-warm-border/50 p-5 shrink-0 sticky top-0">
@@ -37,6 +51,22 @@ export function Sidebar() {
           </NavLink>
         ))}
       </nav>
+
+      {upcoming.length > 0 && (
+        <div className="py-3 border-t border-warm-border/50">
+          <p className="text-xs font-medium text-warm-primary mb-2">🎂 近期生日</p>
+          <div className="space-y-1.5">
+            {upcoming.map(f => (
+              <div key={f.nickname} className="flex items-center justify-between text-xs">
+                <span className="text-warm-text">{f.nickname}</span>
+                <span className={f.daysLeft === 0 ? "text-warm-primary font-medium" : "text-warm-muted"}>
+                  {f.daysLeft === 0 ? "今天!" : f.daysLeft === 1 ? "明天" : `${f.daysLeft}天后`}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="pt-4 border-t border-warm-border/50 space-y-2">
         <p className="text-xs text-warm-muted">

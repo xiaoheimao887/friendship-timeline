@@ -27,6 +27,7 @@ export interface Friend {
   id: string;
   nickname: string;
   name?: string;
+  birthday?: string;
   avatar_url?: string;
   tags: string[];
   met_date: string;
@@ -45,6 +46,7 @@ export interface Friend {
 export interface FriendFormData {
   nickname: string;
   name?: string;
+  birthday?: string;
   avatar_url?: string;
   tags: string[];
   met_date: string;

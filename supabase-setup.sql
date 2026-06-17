@@ -13,6 +13,7 @@ CREATE TABLE friends (
   met_place_name TEXT,
   met_place_lat DOUBLE PRECISION,
   met_place_lng DOUBLE PRECISION,
+  birthday DATE,
   current_location_name TEXT,
   current_location_lat DOUBLE PRECISION,
   current_location_lng DOUBLE PRECISION,
