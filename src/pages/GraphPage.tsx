@@ -5,7 +5,7 @@ import { fetchAllConnections } from '../services/connectionService';
 import type { Connection } from '../types';
 
 const SVG_W = 800;
-const SVG_H = 500;
+const SVG_H = 650;
 
 export function GraphPage() {
   const friends = useFriendStore(s => s.friends);
@@ -360,8 +360,8 @@ export function GraphPage() {
       </div>
 
       <div
-        className="bg-white rounded-card shadow-card overflow-hidden relative"
-        style={{ maxWidth: 800, touchAction: 'none' }}
+        className="bg-white rounded-card shadow-card overflow-hidden relative mx-auto"
+        style={{ maxWidth: 900, touchAction: 'none' }}
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
@@ -370,9 +370,8 @@ export function GraphPage() {
         <svg
           ref={svgRef}
           width="100%"
-          height="600"
           viewBox={`0 0 ${SVG_W} ${SVG_H}`}
-          className="select-none"
+          className="select-none block"
           style={{ cursor: draggingId ? 'grabbing' : 'grab' }}
           onWheel={handleWheel}
           onMouseDown={(e) => {
