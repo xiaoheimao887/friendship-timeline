@@ -9,6 +9,7 @@ CREATE TABLE friends (
   name TEXT,
   avatar_url TEXT,
   tags TEXT[] DEFAULT '{}',
+  custom_fields JSONB DEFAULT '{}',
   met_date DATE NOT NULL,
   met_place_name TEXT,
   met_place_lat DOUBLE PRECISION,
@@ -110,4 +111,35 @@ CREATE INDEX idx_photos_friend_id ON photos(friend_id);
 
 -- 11. 在 Supabase Dashboard > Storage 中创建 avatars bucket 和 photos bucket，设为 public
 
--- 9. 在 Supabase Dashboard > Storage 中创建 avatars bucket，设为 public
+-- 9. Storage bucket RLS policies
+-- 允许匿名上传/读取 avatars bucket
+CREATE POLICY "Allow anonymous uploads to avatars"
+ON storage.objects FOR INSERT
+TO anon
+WITH CHECK (bucket_id = 'avatars');
+
+CREATE POLICY "Allow public reads from avatars"
+ON storage.objects FOR SELECT
+TO public
+USING (bucket_id = 'avatars');
+
+CREATE POLICY "Allow anonymous deletes from avatars"
+ON storage.objects FOR DELETE
+TO anon
+USING (bucket_id = 'avatars');
+
+-- 允许匿名上传/读取 photos bucket
+CREATE POLICY "Allow anonymous uploads to photos"
+ON storage.objects FOR INSERT
+TO anon
+WITH CHECK (bucket_id = 'photos');
+
+CREATE POLICY "Allow public reads from photos"
+ON storage.objects FOR SELECT
+TO public
+USING (bucket_id = 'photos');
+
+CREATE POLICY "Allow anonymous deletes from photos"
+ON storage.objects FOR DELETE
+TO anon
+USING (bucket_id = 'photos');
